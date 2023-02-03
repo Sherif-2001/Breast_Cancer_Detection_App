@@ -29,4 +29,6 @@ async def scoring_endpoint(data: UploadFile = File(...)):
     print(image.shape)
     return {"Tumor Detection": json.dumps(predicted_class.tolist())}
      
-   
+@app.route("/test")
+def test():
+    return "The cloud api is connected"

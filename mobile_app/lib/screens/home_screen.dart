@@ -20,7 +20,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
   void postData(data) async {
     var response = await http.get(
-      Uri.https("test-cloud-production-1c85.up.railway.app", "/model"),
+      Uri.https("breastcancerdetectionapp-production.up.railway.app", "/"),
     );
     print('Response status: ${response.statusCode}');
     print('Response body: ${response.body}');
