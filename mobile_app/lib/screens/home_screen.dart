@@ -4,8 +4,7 @@ import 'package:image_cropper/image_cropper.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:mobile_app/custom_widgets/custom_bottom_sheet.dart';
 import 'package:mobile_app/custom_widgets/custom_drawer.dart';
-// import 'package:tflite_flutter/tflite_flutter.dart';
-// import 'package:tflite_flutter_helper/tflite_flutter_helper.dart';
+import 'package:http/http.dart' as http;
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -18,6 +17,14 @@ class HomeScreen extends StatefulWidget {
 class _HomeScreenState extends State<HomeScreen> {
   File? croppedImage;
   bool isImageAdded = false;
+
+  void postData(data) async {
+    var response = await http.get(
+      Uri.https("test-cloud-production-1c85.up.railway.app", "/model"),
+    );
+    print('Response status: ${response.statusCode}');
+    print('Response body: ${response.body}');
+  }
 
   Future<File?> cropImage({required File imageFile}) async {
     CroppedFile? croppedImage =
@@ -132,19 +139,24 @@ class _HomeScreenState extends State<HomeScreen> {
                 ),
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
-                  children: const [
-                    ListTile(
+                  children: [
+                    const ListTile(
                       leading: Icon(Icons.output),
                       title:
                           Text("Tissue State", style: TextStyle(fontSize: 25)),
                       subtitle: Text("Tumor", style: TextStyle(fontSize: 18)),
                     ),
-                    ListTile(
+                    const ListTile(
                       leading: Icon(Icons.photo_size_select_small_sharp),
                       title: Text("Tumor Relative Size",
                           style: TextStyle(fontSize: 25)),
                       subtitle: Text("20%", style: TextStyle(fontSize: 18)),
                     ),
+                    ElevatedButton(
+                        onPressed: () {
+                          postData({"id": "1", "name": "sherif"});
+                        },
+                        child: const Text("Test API"))
                   ],
                 ),
               ),
