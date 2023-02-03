@@ -1,0 +1,8 @@
+fastapi
+tensorflow
+keras
+uvicorn
+json
+numpy
+opencv-pyton
+gunicorn

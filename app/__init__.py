@@ -2,12 +2,11 @@ from fastapi import FastAPI, File, UploadFile
 import tensorflow as tf
 from keras.models import load_model
 import json 
-from pydantic import BaseModel
 import numpy as np
 import cv2
-import scipy
-from PIL import Image
-import scipy.ndimage
+# import scipy
+# from PIL import Image
+# import scipy.ndimage
  
 app = FastAPI() 
 input_img_size = 256
