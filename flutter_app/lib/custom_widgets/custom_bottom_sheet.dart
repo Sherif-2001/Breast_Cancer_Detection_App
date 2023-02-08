@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_app/custom_widgets/bottom_sheet_item.dart';
 
 class CustomBottomSheet extends StatelessWidget {
   const CustomBottomSheet(
@@ -18,40 +19,16 @@ class CustomBottomSheet extends StatelessWidget {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceEvenly,
             children: [
-              Column(
-                children: [
-                  CircleAvatar(
-                    radius: 30,
-                    backgroundColor: Colors.pink,
-                    child: IconButton(
-                      onPressed: onGalleryTap,
-                      icon: Icon(
-                        Icons.image,
-                        color: Colors.pink.shade50,
-                      ),
-                    ),
-                  ),
-                  const SizedBox(height: 10),
-                  const Text("Gallery")
-                ],
+              BottomSheetItem(
+                onPressed: onCameraTap,
+                label: "Camera",
+                icon: Icons.camera_alt,
               ),
-              Column(
-                children: [
-                  CircleAvatar(
-                    radius: 30,
-                    backgroundColor: Colors.pink,
-                    child: IconButton(
-                      onPressed: onCameraTap,
-                      icon: Icon(
-                        Icons.camera_alt,
-                        color: Colors.pink.shade50,
-                      ),
-                    ),
-                  ),
-                  const SizedBox(height: 10),
-                  const Text("Camera")
-                ],
-              ),
+              BottomSheetItem(
+                onPressed: onGalleryTap,
+                label: "Gallery",
+                icon: Icons.image_rounded,
+              )
             ],
           ),
         ],

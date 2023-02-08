@@ -16,8 +16,9 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
-  File? resizedImage;
+  Image? resizedImage;
   bool isImageAdded = false;
+  bool isOutputAdded = true;
   String tumorType = "";
 
   void uploadImageToCloud(File imageFile) async {
@@ -25,8 +26,10 @@ class _HomeScreenState extends State<HomeScreen> {
         Uri.https("breast-cancer-cloud-production.up.railway.app", "/api"));
 
     var image = http.MultipartFile.fromBytes(
-        'image', imageFile.readAsBytesSync(),
-        filename: "image.png");
+      'image',
+      imageFile.readAsBytesSync(),
+      filename: "image.png",
+    );
     request.files.add(image);
 
     // Get the response from the server
@@ -36,19 +39,33 @@ class _HomeScreenState extends State<HomeScreen> {
     var resultAsJson = jsonDecode(resultAsString);
 
     final tumorTypes = {
-      "0": "No Tumor",
-      "1": "Benign Tumor",
-      "2": "Malignant Tumor"
+      "0": "Benign Tumor",
+      "1": "Malignant Tumor",
+      "2": "No Tumor",
     };
 
     tumorType = tumorTypes[resultAsJson["Tumor Detection"]]!;
+
+    if (resultAsJson["Tumor Detection"] == "0") {
+      resizedImage = Image.asset(
+        "assets/benign_tumor.jpeg",
+        fit: BoxFit.cover,
+      );
+    } else if (resultAsJson["Tumor Detection"] == "1") {
+      resizedImage = Image.asset(
+        "assets/malignant_tumor.jpeg",
+        fit: BoxFit.cover,
+      );
+    }
+
+    isOutputAdded = true;
     setState(() {});
   }
 
   File resizeImage(File imageFile) {
     final image = img_pack.decodeImage(imageFile.readAsBytesSync());
     if (image == null) return imageFile;
-    final resizedImage = img_pack.copyResize(image, width: 256, height: 256);
+    final resizedImage = img_pack.copyResize(image, width: 150, height: 150);
     imageFile.writeAsBytesSync(img_pack.encodePng(resizedImage));
     return imageFile;
   }
@@ -56,10 +73,15 @@ class _HomeScreenState extends State<HomeScreen> {
   void pickImage(ImageSource source) async {
     final pickedImage = await ImagePicker().pickImage(source: source);
     if (pickedImage == null) return;
+    isOutputAdded = false;
     final pickedImageFile = File(pickedImage.path);
-    resizedImage = resizeImage(pickedImageFile);
-    uploadImageToCloud(resizedImage!);
     Navigator.pop(context);
+    resizedImage = Image.file(
+      pickedImageFile,
+      fit: BoxFit.contain,
+    );
+    final resizedImageFile = resizeImage(pickedImageFile);
+    uploadImageToCloud(resizedImageFile);
     isImageAdded = true;
     setState(() {});
   }
@@ -85,15 +107,14 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      floatingActionButton: FloatingActionButton.extended(
-        onPressed: () => showModalSheet(),
-        elevation: 10,
-        backgroundColor: Colors.pink,
-        label: const Text(
-          "ADD IMAGE",
-          style: TextStyle(fontSize: 20),
+      floatingActionButton: Padding(
+        padding: const EdgeInsets.all(15.0),
+        child: FloatingActionButton(
+          onPressed: () => showModalSheet(),
+          elevation: 10,
+          backgroundColor: Colors.pink,
+          child: Icon(Icons.add_a_photo, color: Colors.pink.shade50),
         ),
-        icon: Icon(Icons.add, color: Colors.pink.shade50),
       ),
       drawer: const CustomDrawer(),
       appBar: AppBar(backgroundColor: Colors.pink.shade400, elevation: 0),
@@ -109,22 +130,38 @@ class _HomeScreenState extends State<HomeScreen> {
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             Expanded(
+              flex: 2,
               child: Container(
-                decoration: BoxDecoration(
-                    color: Colors.pink.shade400,
-                    borderRadius: BorderRadius.circular(15)),
                 margin: const EdgeInsets.all(20),
+                decoration: BoxDecoration(
+                  color: Colors.pink.shade400,
+                  borderRadius: BorderRadius.circular(15),
+                ),
                 child: Visibility(
                   visible: isImageAdded,
-                  replacement: const Center(
-                    child: Text("ADD IMAGE",
-                        style: TextStyle(fontSize: 25, color: Colors.white)),
+                  replacement: Center(
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                      children: const [
+                        Text(
+                          "Click",
+                          style: TextStyle(color: Colors.white, fontSize: 20),
+                        ),
+                        Icon(Icons.add_a_photo, color: Colors.white, size: 25),
+                        Text(
+                          "to add an image",
+                          style: TextStyle(color: Colors.white, fontSize: 20),
+                        )
+                      ],
+                    ),
                   ),
-                  child: resizedImage == null
-                      ? Container()
-                      : ClipRRect(
-                          borderRadius: BorderRadius.circular(20),
-                          child: Image.file(resizedImage!)),
+                  child: Padding(
+                    padding: const EdgeInsets.all(20.0),
+                    child: ClipRRect(
+                      borderRadius: BorderRadius.circular(20),
+                      child: resizedImage,
+                    ),
+                  ),
                 ),
               ),
             ),
@@ -135,16 +172,27 @@ class _HomeScreenState extends State<HomeScreen> {
                   borderRadius: BorderRadius.circular(20),
                   border: Border.all(color: Colors.pink, width: 2),
                 ),
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    ListTile(
-                      leading: Icon(Icons.output),
-                      title:
-                          Text("Tissue State", style: TextStyle(fontSize: 25)),
-                      subtitle: Text(tumorType, style: TextStyle(fontSize: 18)),
-                    ),
-                  ],
+                child: Visibility(
+                  visible: isOutputAdded,
+                  replacement: const Center(
+                    child: CircularProgressIndicator(color: Colors.pink),
+                  ),
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      ListTile(
+                        leading: const Icon(Icons.output),
+                        title: const Text(
+                          "Tissue State",
+                          style: TextStyle(fontSize: 25),
+                        ),
+                        subtitle: Text(
+                          tumorType,
+                          style: const TextStyle(fontSize: 18),
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
               ),
             )
